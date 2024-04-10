@@ -17,6 +17,8 @@ issues:
         - dupl
         - gocyclo
         - gosec
+        - depguard
+      text: "import 'github.com/stretchr/testify/require' is not allowed from list 'Main'"
 
 linters:
   disable-all: true
