@@ -14,7 +14,7 @@ func Unpack(s string) (string, error) {
 	originalString := []rune(s)
 	newString := strings.Builder{}
 	var prev, next rune
-	var escapingOn bool = false
+	escapingOn := false
 	for i, r := range originalString {
 		fmt.Printf("%q", r)
 
@@ -47,13 +47,12 @@ func Unpack(s string) (string, error) {
 		}
 
 		if unicode.IsLetter(r) || unicode.IsSpace(r) || escapingOn {
-			quantity, error := strconv.Atoi(string(next))
-			if error != nil {
+			quantity, err := strconv.Atoi(string(next))
+			if err != nil {
 				quantity = 1
 			}
 			newString.WriteString(strings.Repeat(string(r), quantity))
 			escapingOn = false
-
 		}
 	}
 	return newString.String(), nil
