@@ -2,58 +2,67 @@ package hw02unpackstring
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/rivo/uniseg"
 )
 
 var ErrInvalidString = errors.New("invalid string")
 
 func Unpack(s string) (string, error) {
-	originalString := []rune(s)
 	newString := strings.Builder{}
-	var prev, next rune
+	bufferString := ""
 	escapingOn := false
-	for i, r := range originalString {
-		fmt.Printf("%q", r)
+	previousGrapheme := ""
+	previousGraphemeLen := 0
+	multiplicationJustHappened := false
 
-		if i > 0 {
-			prev = originalString[i-1]
-		} else {
-			prev = 0
-		}
+	gr := uniseg.NewGraphemes(s)
+	for gr.Next() {
+		grapheme := gr.Str()
 
-		if i < len(s)-1 {
-			next = originalString[i+1]
-		} else {
-			next = 0
-		}
-
-		if r == '\\' && !escapingOn {
-			if next == 0 {
-				return "", ErrInvalidString
-			}
+		if grapheme == "\\" && !escapingOn {
 			escapingOn = true
 			continue
 		}
 
-		if escapingOn && unicode.IsLetter(r) {
-			return "", ErrInvalidString
-		}
-
-		if unicode.IsDigit(r) && !escapingOn && (prev == 0 || unicode.IsDigit(next)) {
-			return "", ErrInvalidString
-		}
-
-		if unicode.IsLetter(r) || unicode.IsSpace(r) || escapingOn {
-			quantity, err := strconv.Atoi(string(next))
-			if err != nil {
-				quantity = 1
+		if escapingOn {
+			if grapheme != "\\" && !unicode.IsDigit([]rune(grapheme)[0]) {
+				return "", ErrInvalidString
 			}
-			newString.WriteString(strings.Repeat(string(r), quantity))
+			bufferString += grapheme
+			previousGrapheme = grapheme
+			previousGraphemeLen = len(grapheme)
 			escapingOn = false
+			continue
 		}
+
+		if unicode.IsDigit([]rune(grapheme)[0]) {
+			if previousGrapheme == "" || multiplicationJustHappened {
+				return "", ErrInvalidString
+			}
+			if grapheme == "0" {
+				bufferString = bufferString[:len(bufferString)-previousGraphemeLen]
+			} else {
+				quantity, _ := strconv.Atoi(grapheme)
+				bufferString += strings.Repeat(previousGrapheme, quantity-1)
+			}
+			newString.WriteString(bufferString)
+			multiplicationJustHappened = true
+			bufferString = ""
+			continue
+		}
+
+		bufferString += grapheme
+		previousGrapheme = grapheme
+		previousGraphemeLen = len(grapheme)
+		multiplicationJustHappened = false
+	}
+	newString.WriteString(bufferString)
+	if escapingOn {
+		return "", ErrInvalidString
 	}
 	return newString.String(), nil
 }
