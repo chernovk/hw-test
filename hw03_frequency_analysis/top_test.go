@@ -48,6 +48,58 @@ func TestTop10(t *testing.T) {
 		require.Len(t, Top10(""), 0)
 	})
 
+	tests := []struct {
+		name     string
+		text     string
+		expected []string
+	}{
+		{
+			name:     "Empty input",
+			text:     "",
+			expected: []string{},
+		},
+		{
+			name:     "Single word",
+			text:     "word",
+			expected: []string{"word"},
+		},
+		{
+			name:     "All the same word",
+			text:     "repeat repeat repeat repeat repeat",
+			expected: []string{"repeat"},
+		},
+		{
+			name:     "Each word is unique",
+			text:     "each word is unique",
+			expected: []string{"each", "is", "unique", "word"},
+		},
+		{
+			name:     "Punctuation and case sensitivity",
+			text:     "Hello, hello, HELLO, he'll, he'll, he'll",
+			expected: []string{"he'll,", "HELLO,", "Hello,", "he'll", "hello,"},
+		},
+		{
+			name:     "Words with same frequency",
+			text:     "one one two two three three four four five five",
+			expected: []string{"five", "four", "one", "three", "two"},
+		},
+		{
+			name:     "More than ten unique words",
+			text:     "this test includes more than ten unique words each word appears only once",
+			expected: []string{"appears", "each", "includes", "more", "once", "only", "ten", "test", "than", "this"},
+		},
+		{
+			name:     "Words with hyphens and apostrophes",
+			text:     "it's the time-tested method-of-operation for someone's specific-case",
+			expected: []string{"for", "it's", "method-of-operation", "someone's", "specific-case", "the", "time-tested"},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			require.Equal(t, test.expected, Top10(test.text))
+		})
+	}
+
 	t.Run("positive test", func(t *testing.T) {
 		if taskWithAsteriskIsCompleted {
 			expected := []string{
