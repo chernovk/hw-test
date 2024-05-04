@@ -131,4 +131,41 @@ func TestTop10(t *testing.T) {
 			require.Equal(t, expected, Top10(text))
 		}
 	})
+
+	testsExtra := []struct {
+		name     string
+		text     string
+		expected []string
+	}{
+		{
+			name: "Mixed case with punctuation",
+			text: `This morning, I asked my colleague: 'Have you seen the reports 
+			from yesterday?' They replied: 'Yes, I saw the Reports yesterday evening.' 
+			The dialogue went on while we discussed various topics, including the upcoming 
+			meeting and the latest news from the office. When I returned to my desk, I began to draft the meeting notes, 
+			making sure everything was recorded properly. By the end of the day, 
+			I was exhausted from all the talking and writing.`,
+			expected: []string{"the", "i", "from", "and", "meeting", "my", "reports", "to", "was", "yesterday"},
+		},
+		{
+			name: "Text with apostrophes and hyphens",
+			text: `It's important to remember that well-being isn't just about physical health; it's about mental health too. 
+			Today's seminar focuses on how we're adapting to new challenges in today's fast-paced world. 
+			We'll discuss stress-management techniques and how they're applied in our daily lives. 
+			Remember, it's not just about handling stress—it's about thriving in spite of it.`,
+			expected: []string{"about", "in", "it's", "health", "how", "just", "remember", "to", "today's", "adapting"},
+		},
+		{
+			name: "Repeated words with different punctuation and case",
+			text: `Hello, hello, HELLO! How are you doing today? Hello again, my friend. 
+			Today is a wonderful day to say hello to everyone you meet. Hello, hello, HELLO!`,
+			expected: []string{"hello", "Hello", "HELLO", "today", "are", "again", "day", "doing", "everyone", "friend"},
+		},
+	}
+
+	for _, test := range testsExtra {
+		t.Run(test.name, func(t *testing.T) {
+			require.Equal(t, test.expected, Top10Extra(test.text))
+		})
+	}
 }
