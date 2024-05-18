@@ -49,22 +49,77 @@ func TestCache(t *testing.T) {
 		require.Nil(t, val)
 	})
 
+	t.Run("displacement of a first element", func(t *testing.T) {
+		c := NewCache(3)
+
+		c.Set("aaa", 100)
+		c.Set("bbb", 200)
+		c.Set("ссс", 300)
+
+		wasInCache := c.Set("ссс", 300)
+		require.True(t, wasInCache)
+
+		wasInCache = c.Set("ddd", 300)
+		require.False(t, wasInCache)
+
+		val, ok := c.Get("aaa")
+		require.False(t, ok)
+		require.Nil(t, val)
+	})
+
+	t.Run("displacement of inactive element", func(t *testing.T) {
+		c := NewCache(3)
+
+		c.Set("aaa", 100)
+		c.Set("bbb", 200)
+		c.Set("ссс", 300)
+
+		c.Get("ccc")
+		c.Get("bbb")
+		c.Get("aaa")
+
+		c.Set("ddd", 400)
+
+		val, ok := c.Get("ccc")
+		require.False(t, ok)
+		require.Nil(t, val)
+	})
+
 	t.Run("purge logic", func(t *testing.T) {
-		// Write me
+		c := NewCache(3)
+
+		c.Set("aaa", 100)
+		c.Set("bbb", 200)
+		c.Set("ссс", 300)
+
+		c.Clear()
+		val, ok := c.Get("ccc")
+		require.False(t, ok)
+		require.Nil(t, val)
+
+		val, ok = c.Get("bbb")
+		require.False(t, ok)
+		require.Nil(t, val)
+
+		val, ok = c.Get("aaa")
+		require.False(t, ok)
+		require.Nil(t, val)
 	})
 }
 
 func TestCacheMultithreading(t *testing.T) {
-	t.Skip() // Remove me if task with asterisk completed.
+	// t.Skip() // Remove me if task with asterisk completed.
 
 	c := NewCache(10)
+
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
 
 	go func() {
 		defer wg.Done()
 		for i := 0; i < 1_000_000; i++ {
-			c.Set(Key(strconv.Itoa(i)), i)
+			wasInCache := c.Set(Key(strconv.Itoa(i)), i)
+			require.False(t, wasInCache)
 		}
 	}()
 
