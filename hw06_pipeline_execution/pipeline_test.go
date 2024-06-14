@@ -90,4 +90,51 @@ func TestPipeline(t *testing.T) {
 		require.Len(t, result, 0)
 		require.Less(t, int64(elapsed), int64(abortDur)+int64(fault))
 	})
+
+	t.Run("empty case", func(t *testing.T) {
+		in := make(Bi)
+		data := []int{}
+
+		go func() {
+			defer close(in)
+			for _, item := range data {
+				in <- item
+			}
+		}()
+
+		start := time.Now()
+		result := make([]int, 0)
+		for item := range ExecutePipeline(in, nil, stages...) {
+			result = append(result, item.(int))
+		}
+		elapsed := time.Since(start)
+
+		require.Empty(t, result)
+		require.Less(t, int64(elapsed), int64(fault))
+	})
+
+	t.Run("first stage strings", func(t *testing.T) {
+		in := make(Bi)
+		data := []int{1, 2, 3, 4, 5}
+
+		go func() {
+			defer close(in)
+			for _, item := range data {
+				in <- item
+			}
+		}()
+
+		start := time.Now()
+		result := make([]string, 0)
+		for item := range ExecutePipeline(in, nil, stages[3:]...) {
+			result = append(result, item.(string))
+		}
+		elapsed := time.Since(start)
+
+		require.Equal(t, []string{"1", "2", "3", "4", "5"}, result)
+		require.Less(t,
+			int64(elapsed),
+			// ~0.8s for processing 5 values in 4 stages (100ms every) concurrently
+			int64(sleepPerStage)*int64(len(stages[3:])+len(data)-1)+int64(fault))
+	})
 }
