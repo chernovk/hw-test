@@ -1,0 +1,6 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/chernovk/hw-test/hw10_program_optimization
+BenchmarkGetStatsNew-8   	  294936	      4083 ns/op	    6114 B/op	      93 allocs/op
+PASS
+ok  	github.com/chernovk/hw-test/hw10_program_optimization	2.711s

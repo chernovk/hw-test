@@ -1,0 +1,29 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/chernovk/hw-test/hw10_program_optimization
+              │   old.txt    │       new.txt       │
+              │    sec/op    │    sec/op     vs base   │
+GetStatsOld-8   74.67m ± ∞ ¹
+GetStatsNew-8                  4.083µ ± ∞ ¹
+geomean         74.67m         4.083µ        ? ² ³
+¹ need >= 6 samples for confidence interval at level 0.95
+² benchmark set differs from baseline; geomeans may not be comparable
+³ ratios must be >0 to compute geomean
+
+              │    old.txt    │       new.txt        │
+              │     B/op      │     B/op       vs base   │
+GetStatsOld-8   129.7Mi ± ∞ ¹
+GetStatsNew-8                   5.971Ki ± ∞ ¹
+geomean         129.7Mi         5.971Ki        ? ² ³
+¹ need >= 6 samples for confidence interval at level 0.95
+² benchmark set differs from baseline; geomeans may not be comparable
+³ ratios must be >0 to compute geomean
+
+              │   old.txt    │      new.txt       │
+              │  allocs/op   │  allocs/op   vs base   │
+GetStatsOld-8   1.700M ± ∞ ¹
+GetStatsNew-8                  93.00 ± ∞ ¹
+geomean         1.700M         93.00        ? ² ³
+¹ need >= 6 samples for confidence interval at level 0.95
+² benchmark set differs from baseline; geomeans may not be comparable
+³ ratios must be >0 to compute geomean
